@@ -1,0 +1,22 @@
+---
+- name: Deploy Linux Server Performance Dashboard
+  hosts: linux
+  become: true
+
+  tasks:
+    # Copy our monitoring script
+    - name: Copy server-stats.sh to remote server
+      copy:
+        src: files/server-stats.sh
+        dest: /home/ubuntu/server-stats.sh
+        mode: "0755"
+
+    # Run the monitoring script
+    - name: Run server stats script
+      command: /home/ubuntu/server-stats.sh
+      register: dashboard
+
+    # Display the output
+    - name: Show output
+      debug:
+        var: dashboard.stdout_lines
