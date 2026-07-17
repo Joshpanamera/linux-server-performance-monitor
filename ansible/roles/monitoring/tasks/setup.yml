@@ -1,0 +1,35 @@
+---
+- name: Update apt package cache
+  apt:
+    update_cache: yes
+
+- name: Ensure bc is installed
+  apt:
+    name: bc
+    state: present
+
+- name: Ensure Git is installed
+  apt:
+    name: git
+    state: present
+
+- name: Ensure curl is installed
+  apt:
+    name: curl
+    state: present
+
+- name: Create monitoring application directory
+  file:
+    path: /opt/server-monitor
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: "0755"
+
+- name: Ensure metrics.json ownership
+  file:
+    path: /opt/server-monitor/metrics.json
+    owner: ubuntu
+    group: ubuntu
+    state: touch
+    mode: "0644"

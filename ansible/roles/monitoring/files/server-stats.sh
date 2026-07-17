@@ -33,7 +33,7 @@ today=$(date)
 ##############################################
 
 idle=$(top -bn1 | grep "Cpu(s)" | awk '{print $8}')
-usage=$(echo "100 - $idle" | bc)
+usage=$(awk "BEGIN {printf \"%.1f\", 100 - $idle}")
 
 ##############################################
 # Memory Information
@@ -146,3 +146,26 @@ echo
 echo -e "${CYAN}Logged-in Users${NC}"
 echo "---------------"
 echo -e "${WHITE}$logged_users${NC}"
+##############################################
+# Export Metrics as JSON
+##############################################
+
+cat > /opt/server-monitor/metrics.json <<EOF
+{
+  "hostname": "$hostname",
+  "date": "$today",
+  "cpu_usage": "$usage",
+  "memory": {
+    "total": "$total_memory",
+    "used": "$used_memory",
+    "free": "$free_memory"
+  },
+  "disk": {
+    "total": "$total_disk",
+    "used": "$used_disk",
+    "available": "$available_disk",
+    "usage": "$disk_usage"
+  },
+  "uptime": "$uptime_info"
+}
+EOF

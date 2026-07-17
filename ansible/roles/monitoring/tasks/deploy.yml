@@ -1,0 +1,31 @@
+---
+- name: Copy server-stats.sh to monitoring directory
+  copy:
+    src: files/server-stats.sh
+    dest: /opt/server-monitor/server-stats.sh
+    owner: ubuntu
+    group: ubuntu
+    mode: "0755"
+
+- name: Run server stats script
+  command: /opt/server-monitor/server-stats.sh
+  register: dashboard
+
+- name: Show output
+  debug:
+    var: dashboard.stdout_lines
+
+- name: Schedule server monitoring every 5 minutes
+  cron:
+    name: "Linux Server Performance Monitor"
+    user: ubuntu
+    minute: "*/5"
+    job: "/opt/server-monitor/server-stats.sh >> /opt/server-monitor/server-monitor.log"
+
+- name: Install logrotate configuration
+  copy:
+    src: templates/server-monitor-logrotate
+    dest: /etc/logrotate.d/server-monitor
+    owner: root
+    group: root
+    mode: "0644"

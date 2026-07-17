@@ -1,0 +1,8 @@
+/opt/server-monitor/server-monitor.log
+    daily
+    rotate 7
+    compress
+    missingok
+    notifempty
+    copytruncate
+}

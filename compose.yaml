@@ -1,0 +1,9 @@
+services:
+  linux-dashboard:
+    build: .
+    container_name: linux-dashboard
+
+    ports:
+      - "5000:5000"
+
+    restart: unless-stopped

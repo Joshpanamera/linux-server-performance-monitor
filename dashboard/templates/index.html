@@ -1,0 +1,328 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Linux Monitoring Platform</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body>
+
+    <div class="wrapper">
+
+        <header>
+
+            <h1>🖥 Linux Monitoring Platform</h1>
+
+            <p>Real-Time Infrastructure Monitoring Dashboard</p>
+
+            <div id="health" class="status">
+
+                {{ health }}
+
+            </div>
+
+        </header>
+
+        <section class="grid">
+
+            <!-- Hostname -->
+
+            <div class="card">
+
+                <div class="icon">🖥</div>
+
+                <h3>Hostname</h3>
+
+                <h2 id="hostname">
+
+                    {{ metrics.hostname }}
+
+                </h2>
+
+            </div>
+
+            <!-- CPU -->
+
+            <div class="card">
+
+                <div class="icon">⚡</div>
+
+                <h3>CPU Usage</h3>
+
+                <h2>
+
+                    <span id="cpu">
+
+                        {{ metrics.cpu_usage }}
+
+                    </span>%
+
+                </h2>
+
+                <p id="cpu-status" class="{{ cpu_colour }}">
+
+                    {{ cpu_status }}
+
+                </p>
+
+                <div class="progress">
+
+                    <div id="cpu-bar" class="bar cpu" style="width: {{ metrics.cpu_usage }}%;">
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Memory -->
+
+            <div class="card">
+
+                <div class="icon">🧠</div>
+
+                <h3>Memory Usage</h3>
+
+                <h2 id="memory-used">
+
+                    {{ metrics.memory.used }}
+
+                </h2>
+
+                <small>
+
+                    of
+
+                    <span id="memory-total">
+
+                        {{ metrics.memory.total }}
+
+                    </span>
+
+                </small>
+
+            </div>
+
+            <!-- Disk -->
+
+            <div class="card">
+
+                <div class="icon">💾</div>
+
+                <h3>Disk Usage</h3>
+
+                <h2 id="disk">
+
+                    {{ metrics.disk.usage }}
+
+                </h2>
+
+            </div>
+
+            <!-- Uptime -->
+
+            <div class="card">
+
+                <div class="icon">⏱</div>
+
+                <h3>Server Uptime</h3>
+
+                <h2 id="uptime">
+
+                    {{ metrics.uptime }}
+
+                </h2>
+
+            </div>
+
+            <!-- CPU History -->
+
+            <div class="card full">
+
+                <h3>
+
+                    📈 CPU Usage History
+
+                </h3>
+
+                <canvas id="cpuChart"></canvas>
+
+            </div>
+
+        </section>
+        ```
+        ```html
+    </div>
+
+    <script>
+
+        const cpuHistory = [];
+
+        const cpuChart = new Chart(document.getElementById("cpuChart"), {
+
+            type: "line",
+
+            data: {
+
+                labels: [],
+
+                datasets: [{
+
+                    label: "CPU Usage %",
+
+                    data: [],
+
+                    borderColor: "#00d4ff",
+
+                    backgroundColor: "rgba(0,212,255,0.25)",
+
+                    fill: true,
+
+                    tension: 0.35
+
+                }]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                animation: false,
+
+                plugins: {
+
+                    legend: {
+
+                        display: false
+
+                    }
+
+                },
+
+                scales: {
+
+                    y: {
+
+                        beginAtZero: true,
+
+                        max: 100
+
+                    }
+
+                }
+
+            }
+
+        });
+
+
+        async function updateMetrics() {
+
+            const response = await fetch("/api/metrics");
+
+            const metrics = await response.json();
+
+            document.getElementById("hostname").textContent =
+                metrics.hostname;
+
+            document.getElementById("cpu").textContent =
+                metrics.cpu_usage;
+
+            document.getElementById("memory-used").textContent =
+                metrics.memory.used;
+
+            document.getElementById("memory-total").textContent =
+                metrics.memory.total;
+
+            document.getElementById("disk").textContent =
+                metrics.disk.usage;
+
+            document.getElementById("uptime").textContent =
+                metrics.uptime;
+
+            document.getElementById("cpu-bar").style.width =
+                metrics.cpu_usage + "%";
+
+
+            let cpu = parseFloat(metrics.cpu_usage);
+
+
+            cpuHistory.push(cpu);
+
+            if (cpuHistory.length > 20) {
+
+                cpuHistory.shift();
+
+            }
+
+            cpuChart.data.labels =
+                cpuHistory.map((_, i) => i + 1);
+
+            cpuChart.data.datasets[0].data =
+                cpuHistory;
+
+            cpuChart.update();
+
+
+            const status =
+                document.getElementById("cpu-status");
+
+            const health =
+                document.getElementById("health");
+
+
+            if (cpu < 50) {
+
+                status.textContent = "Healthy";
+
+                status.className = "green";
+
+                health.textContent = "🟢 ONLINE";
+
+            }
+
+            else if (cpu < 80) {
+
+                status.textContent = "Warning";
+
+                status.className = "orange";
+
+                health.textContent = "🟡 UNDER LOAD";
+
+            }
+
+            else {
+
+                status.textContent = "Critical";
+
+                status.className = "red";
+
+                health.textContent = "🔴 CRITICAL";
+
+            }
+
+        }
+
+
+        updateMetrics();
+
+        setInterval(updateMetrics, 5000);
+
+    </script>
+
+</body>
+
+</html>
+```

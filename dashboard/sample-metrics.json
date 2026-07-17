@@ -1,0 +1,17 @@
+{
+    "hostname": "ip-172-31-19-108",
+    "date": "Thu Jul 16 13:09 UTC",
+    "cpu_usage": "4.8",
+    "memory": {
+        "total": "908Mi",
+        "used": "351Mi",
+        "free": "223Mi"
+    },
+    "disk": {
+        "total": "6.7G",
+        "used": "2.7G",
+        "available": "4.0G",
+        "usage": "41%"
+    },
+    "uptime": "2 days 18 hours"
+}

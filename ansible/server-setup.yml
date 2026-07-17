@@ -1,0 +1,7 @@
+---
+- name: Prepare Ubuntu Server for Monitoring
+  hosts: linux
+  become: true
+
+  tasks:
+    - import_tasks: tasks/setup.yml
